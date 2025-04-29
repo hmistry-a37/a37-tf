@@ -1,0 +1,58 @@
+name: "Deploy EKS Applications via Helm"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-apps:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+
+    - name: Install Helm
+      run: |
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+    - name: Add Helm Repos
+      run: |
+        helm repo add argo https://argoproj.github.io/argo-helm
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+        helm repo add eks https://aws.github.io/eks-charts
+        helm repo update
+
+    - name: Deploy ArgoCD
+      run: |
+        helm upgrade --install argocd argo/argo-cd \
+          --namespace argocd --create-namespace \
+          -f argocd/values-dev.yaml
+
+    - name: Deploy Monitoring Stack
+      run: |
+        helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+          --namespace monitoring --create-namespace \
+          -f monitoring/values-dev.yaml
+
+    - name: Deploy Cluster Autoscaler
+      run: |
+        helm upgrade --install cluster-autoscaler eks/cluster-autoscaler \
+          --namespace kube-system \
+          -f autoscaler/values-dev.yaml
+
+    - name: Deploy AWS LoadBalancer Controller
+      run: |
+        helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
+          --namespace kube-system \
+          -f aws-load-balancer-controller/values-dev.yaml

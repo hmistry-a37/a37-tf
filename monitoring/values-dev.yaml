@@ -1,0 +1,21 @@
+grafana:
+  enabled: true
+  adminPassword: "SuperSecurePassword123!"
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/certificate-arn: 
+    hosts:
+      - monitoring-dev.applied37.ai
+    tls:
+      - hosts:
+          - monitoring-dev.applied37.ai
+
+prometheus:
+  ingress:
+    enabled: false
+alertmanager:
+  ingress:
+    enabled: false

@@ -1,0 +1,24 @@
+server:
+  service:
+    type: ClusterIP
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/certificate-arn: 
+    hosts:
+      - argocd-dev.applied37.ai
+    tls:
+      - hosts:
+          - argocd-dev.applied37.ai
+
+controller:
+  replicas: 2
+
+repoServer:
+  replicas: 2
+
+applicationSet:
+  replicas: 2
