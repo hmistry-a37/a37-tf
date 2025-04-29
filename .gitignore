@@ -1,0 +1,22 @@
+# Terraform specific files
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.tfvars.json
+
+# Terraform provider binaries (if applicable)
+terraform-provider-*
+
+# IDE or editor-specific files
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.bak
+
